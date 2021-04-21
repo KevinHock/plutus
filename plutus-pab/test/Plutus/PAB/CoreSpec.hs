@@ -153,14 +153,15 @@ guessingGameTest =
               assertTxCounts
                   "Activating the game does not generate transactions."
                   initialTxCounts
-              _ <- Simulator.waitNSlots 2
+              _ <- Simulator.waitNSlots 5
               lock
                   instanceId
                   Contracts.GameStateMachine.LockArgs
                       { Contracts.GameStateMachine.lockArgsValue = lovelaceValueOf lockAmount
                       , Contracts.GameStateMachine.lockArgsSecret = "password"
                       }
-              _ <- Simulator.waitNSlots 2
+              _ <- Simulator.waitNSlots 5
+
               assertTxCounts
                   "Locking the game state machine should produce two transactions"
                   (initialTxCounts & Simulator.txValidated +~ 2)
@@ -175,13 +176,13 @@ guessingGameTest =
                       , Contracts.GameStateMachine.guessArgsValueTakenOut = lovelaceValueOf lockAmount
                       }
 
-              _ <- Simulator.waitNSlots 2
+              _ <- Simulator.waitNSlots 5
               assertTxCounts
                 "A wrong guess does not produce a valid transaction on the chain."
                 (initialTxCounts & Simulator.txValidated +~ 2)
               game2Id <- Simulator.activateContract defaultWallet GameStateMachine
 
-              _ <- Simulator.waitNSlots 2
+              _ <- Simulator.waitNSlots 5
               guess
                   game2Id
                   Contracts.GameStateMachine.GuessArgs
@@ -190,7 +191,7 @@ guessingGameTest =
                       , Contracts.GameStateMachine.guessArgsValueTakenOut = lovelaceValueOf lockAmount
                       }
 
-              _ <- Simulator.waitNSlots 2
+              _ <- Simulator.waitNSlots 5
               assertTxCounts
                 "A correct guess creates a third transaction."
                 (initialTxCounts & Simulator.txValidated +~ 3)
