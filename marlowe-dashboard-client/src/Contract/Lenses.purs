@@ -18,9 +18,9 @@ import Data.Maybe (Maybe)
 import Data.Symbol (SProxy(..))
 import Marlowe.Execution (ExecutionState, NamedAction)
 import Marlowe.Extended.Metadata (MetaData)
+import Marlowe.PAB (ContractInstanceId)
 import Marlowe.Semantics as Semantic
 import WalletData.Types (WalletNickname)
-import Types (ContractInstanceId)
 
 _tab :: Lens' State Tab
 _tab = prop (SProxy :: SProxy "tab")
