@@ -13,40 +13,31 @@ module Main
     ( main
     ) where
 
-import           Control.Monad                           (forM, forM_, void, when)
+import           Control.Monad                           (forM, void)
 import           Control.Monad.Freer                     (Eff, Member, interpret, type (~>))
 import           Control.Monad.Freer.Error               (Error)
-import           Control.Monad.Freer.Extras.Log          (LogMsg)
 import           Control.Monad.IO.Class                  (MonadIO (..))
 import           Data.Aeson                              (FromJSON, Result (..), ToJSON, encode, fromJSON)
-import           Data.Bifunctor                          (Bifunctor (first))
 import qualified Data.Map.Strict                         as Map
 import qualified Data.Monoid                             as Monoid
 import qualified Data.Semigroup                          as Semigroup
 import           Data.Text                               (Text)
-import           Data.Text.Extras                        (tshow)
 import           Data.Text.Prettyprint.Doc               (Pretty (..), viaShow)
 import           GHC.Generics                            (Generic)
-import           Ledger
-import           Ledger.Ada
-import           Ledger.Constraints
-import           Ledger.Value                            as Value
-import           Playground.Schema                       (endpointsToSchemas)
-import           Plutus.Contract                         hiding (when)
+import           Ledger.Ada                              (adaSymbol, adaToken)
+import           Plutus.Contract
 import qualified Plutus.Contracts.Currency               as Currency
 import qualified Plutus.Contracts.Uniswap                as Uniswap
-import           Plutus.PAB.Effects.Contract             (ContractEffect (..), PABContract (..))
+import           Plutus.PAB.Effects.Contract             (ContractEffect (..))
 import           Plutus.PAB.Effects.Contract.Builtin     (Builtin, SomeBuiltin (..), type (.\\))
 import qualified Plutus.PAB.Effects.Contract.Builtin     as Builtin
 import           Plutus.PAB.Effects.ContractTest.Uniswap as US
-import           Plutus.PAB.Events.ContractInstanceState (PartiallyDecodedResponse)
-import           Plutus.PAB.Monitoring.PABLogMsg         (ContractEffectMsg (..))
-import           Plutus.PAB.Simulator                    (SimulatorContractHandler, SimulatorEffectHandlers)
+import           Plutus.PAB.Simulator                    (SimulatorEffectHandlers)
 import qualified Plutus.PAB.Simulator                    as Simulator
 import           Plutus.PAB.Types                        (PABError (..))
 import qualified Plutus.PAB.Webserver.Server             as PAB.Server
 import           Prelude                                 hiding (init)
-import           Wallet.Emulator.Types                   (Wallet (..), walletPubKey)
+import           Wallet.Emulator.Types                   (Wallet (..))
 
 
 main :: IO ()
@@ -91,9 +82,6 @@ main = void $ Simulator.runSimulationWith handlers $ do
 
     _ <- liftIO getLine
     shutdown
---
-
--- data Uniswap
 
 data UniswapContracts =
       Init
@@ -101,11 +89,6 @@ data UniswapContracts =
     | UniswapUser Uniswap.Uniswap
     deriving (Eq, Ord, Show, Generic)
     deriving anyclass (FromJSON, ToJSON)
-
--- instance PABContract Uniswap where
---     type ContractDef Uniswap = UniswapContracts
---     type State Uniswap = PartiallyDecodedResponse ContractPABRequest
---     serialisableState _ = id
 
 instance Pretty UniswapContracts where
     pretty = viaShow
@@ -129,32 +112,3 @@ handlers :: SimulatorEffectHandlers (Builtin UniswapContracts)
 handlers =
     Simulator.mkSimulatorHandlers @(Builtin UniswapContracts) [] -- [Init, UniswapStart, UniswapUser ???]
     $ interpret handleUniswapContract
---
--- handleUniswapContract = \case
---     InitialState c -> case c of
---         Init           -> doContractInit init
---         UniswapStart   -> doContractInit start
---         UniswapUser us -> doContractInit $ userEndpoints us
---     UpdateContract c state p -> case c of
---         Init           -> doContractUpdate init               state p
---         UniswapStart   -> doContractUpdate start              state p
---         UniswapUser us -> doContractUpdate (userEndpoints us) state p
---     ExportSchema t -> case t of
---         Init          -> pure $ endpointsToSchemas @Empty
---         UniswapStart  -> pure $ endpointsToSchemas @Empty
---         UniswapUser _ -> pure $ endpointsToSchemas @Empty
---             -- TODO:
---             -- replace with (Marlowe.MarloweSchema .\\ BlockchainActions)
---             -- (needs some instances for the Marlowe types (MarloweParams, etc))
---     where
---         init          = first tshow initContract
---         start         = first tshow Uniswap.ownerEndpoint
---         userEndpoints = first tshow . Uniswap.userEndpoints
---
--- handlers :: SimulatorEffectHandlers Uniswap
--- handlers = Simulator.mkSimulatorHandlers @Uniswap [] mlw where
---     mlw :: SimulatorContractHandler Uniswap
---     mlw =
---         Simulator.handleContractEffectMsg @Uniswap
---         . reinterpret handleUniswapContract
-

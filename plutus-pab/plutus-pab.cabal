@@ -255,18 +255,15 @@ executable plutus-uniswap
                  -Wno-missing-import-lists -Wredundant-constraints -O0
     build-depends:
         base >=4.9 && <5,
+        aeson -any,
+        containers -any,
+        freer-simple -any,
+        plutus-contract -any,
+        plutus-ledger -any,
         plutus-pab,
         plutus-use-cases -any,
-        text -any,
-        plutus-contract -any,
-        playground-common -any,
-        plutus-ledger-api -any,
-        plutus-ledger -any,
-        containers -any,
-        aeson -any,
-        freer-extras -any,
-        freer-simple -any,
-        prettyprinter -any
+        prettyprinter -any,
+        text -any
 
 
 executable plutus-game
