@@ -29,6 +29,7 @@ module Plutus.Contracts.Uniswap
     , RemoveParams (..)
     , AddParams (..)
     , UniswapUserSchema, UserContractState (..)
+    , UniswapOwnerSchema
     , start, create, add, remove, close, swap, pools
     , ownerEndpoint, userEndpoints
     ) where
@@ -914,6 +915,10 @@ ownerEndpoint = do
     tell $ Last $ Just $ case e of
         Left err -> Left err
         Right us -> Right us
+
+type UniswapOwnerSchema =
+    BlockchainActions
+        .\/ Endpoint "start" ()
 
 -- | Schema for the endpoints for users of Uniswap.
 type UniswapUserSchema =
