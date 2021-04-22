@@ -21,7 +21,7 @@
 --
 module Plutus.Contracts.Uniswap
     ( Coin
-    , coin, coinValueOf
+    , coin, coinValueOf, mkCoin
     , Uniswap (..), uniswap
     , poolStateCoinFromUniswapCurrency, liquidityCoin
     , CreateParams (..)
@@ -440,7 +440,7 @@ lpTicker LiquidityPool{..} = TokenName $
   where
     (AssetClass (c_cs, c_tok), AssetClass (d_cs, d_tok))
         | lpCoinA < lpCoinB = (lpCoinA, lpCoinB)
-        | otherwise                = (lpCoinB, lpCoinA)
+        | otherwise         = (lpCoinB, lpCoinA)
 
 mkUniswapValidator :: Uniswap
                    -> Coin
@@ -516,7 +516,7 @@ liquidityCoin :: CurrencySymbol -- ^ The currency identifying the Uniswap instan
               -> Coin
 liquidityCoin cs coinA coinB = mkCoin (liquidityCurrency $ uniswap cs) $ lpTicker $ LiquidityPool coinA coinB
 
--- | Paraneters for the @create@-endpoint, which creates a new liquidity pool.
+-- | Parameters for the @create@-endpoint, which creates a new liquidity pool.
 data CreateParams = CreateParams
     { cpCoinA   :: Coin    -- ^ One 'Coin' of the liquidity pair.
     , cpCoinB   :: Coin    -- ^ The other 'Coin'.
